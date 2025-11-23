@@ -19,13 +19,19 @@ export default function Rankings() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="font-display text-5xl md:text-6xl font-bold uppercase mb-3 flex items-center gap-3" data-testid="heading-rankings">
-            <TrendingUp className="w-12 h-12 text-primary" />
+          <h1 className="font-display text-5xl md:text-6xl font-bold uppercase mb-3 flex items-center gap-3 animate-slide-pitch" data-testid="heading-rankings">
+            <TrendingUp className="w-12 h-12 text-primary animate-bounce-ball" />
             Rankings
           </h1>
           <p className="text-xl text-muted-foreground">
             Top teams ranked by ELO rating
           </p>
+          <div className="mt-4 flex gap-2">
+            <Badge className="bg-yellow-600 animate-pulse-goal">🥇 Platinum</Badge>
+            <Badge className="bg-yellow-400 text-gray-900">🥈 Gold</Badge>
+            <Badge className="bg-slate-400 text-gray-900">🥉 Silver</Badge>
+            <Badge className="bg-amber-700">🏅 Bronze</Badge>
+          </div>
         </div>
 
         {/* Top 3 Podium */}

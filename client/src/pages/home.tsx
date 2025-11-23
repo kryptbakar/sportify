@@ -2,8 +2,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, Users, TrendingUp, Sparkles } from "lucide-react";
+import { Trophy, Calendar, Users, TrendingUp, Sparkles, Goal } from "lucide-react";
 import { Link } from "wouter";
+import { FootballPitch, FootballBall, PlayerMarker } from "@/components/football-pitch";
 
 export default function Home() {
   const { user } = useAuth();
@@ -11,23 +12,44 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-5xl md:text-6xl font-bold uppercase mb-3">
-            Welcome Back{user?.firstName ? `, ${user.firstName}` : ''}!
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            Your football command center
-          </p>
+        {/* Welcome Header with Interactive Pitch */}
+        <div className="mb-12 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            <div className="lg:col-span-2">
+              <h1 className="font-display text-5xl md:text-6xl font-bold uppercase mb-3 animate-slide-pitch">
+                Welcome Back{user?.firstName ? `, ${user.firstName}` : ''}!
+              </h1>
+              <p className="text-xl text-muted-foreground mb-4">
+                Your football command center
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                <Badge className="bg-primary animate-pulse-goal">⚽ Live Bookings</Badge>
+                <Badge variant="secondary" className="animate-wiggle">🏆 ELO Rankings</Badge>
+              </div>
+            </div>
+            
+            {/* Mini Interactive Pitch */}
+            <div className="h-48 animate-glow">
+              <FootballPitch className="h-full p-6 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                  <FootballBall />
+                  <span className="text-sm font-display text-white/80">Kickoff Time!</span>
+                </div>
+              </FootballPitch>
+            </div>
+          </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Interactive Sports Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Link href="/turfs">
-            <Card className="hover-elevate active-elevate-2 cursor-pointer" data-testid="card-quick-book">
+            <Card className="hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 group" data-testid="card-quick-book">
               <CardContent className="p-6">
-                <Calendar className="w-8 h-8 text-primary mb-3" />
-                <h3 className="font-display text-xl font-bold uppercase mb-1">
+                <div className="relative mb-3 h-12 flex items-center">
+                  <Calendar className="w-8 h-8 text-primary group-hover:animate-bounce-ball" />
+                  <div className="absolute right-0 top-0 w-3 h-3 bg-primary rounded-full animate-pulse-goal" />
+                </div>
+                <h3 className="font-display text-xl font-bold uppercase mb-1 group-hover:text-primary">
                   Book Turf
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -38,10 +60,16 @@ export default function Home() {
           </Link>
 
           <Link href="/teams">
-            <Card className="hover-elevate active-elevate-2 cursor-pointer" data-testid="card-quick-teams">
+            <Card className="hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 group" data-testid="card-quick-teams">
               <CardContent className="p-6">
-                <Users className="w-8 h-8 text-primary mb-3" />
-                <h3 className="font-display text-xl font-bold uppercase mb-1">
+                <div className="relative mb-3 h-12 flex items-center gap-1">
+                  <Users className="w-8 h-8 text-primary" />
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-wiggle" style={{animationDelay: '0s'}} />
+                    <div className="w-2 h-2 rounded-full bg-yellow-500 animate-wiggle" style={{animationDelay: '0.1s'}} />
+                  </div>
+                </div>
+                <h3 className="font-display text-xl font-bold uppercase mb-1 group-hover:text-primary">
                   My Teams
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -52,10 +80,12 @@ export default function Home() {
           </Link>
 
           <Link href="/matchmaking">
-            <Card className="hover-elevate active-elevate-2 cursor-pointer" data-testid="card-quick-matchmaking">
+            <Card className="hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 group" data-testid="card-quick-matchmaking">
               <CardContent className="p-6">
-                <Sparkles className="w-8 h-8 text-primary mb-3" />
-                <h3 className="font-display text-xl font-bold uppercase mb-1">
+                <div className="relative mb-3 h-12 flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-primary animate-rotate-ball" />
+                </div>
+                <h3 className="font-display text-xl font-bold uppercase mb-1 group-hover:text-primary">
                   Find Match
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -66,10 +96,12 @@ export default function Home() {
           </Link>
 
           <Link href="/tournaments">
-            <Card className="hover-elevate active-elevate-2 cursor-pointer" data-testid="card-quick-tournaments">
+            <Card className="hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 group" data-testid="card-quick-tournaments">
               <CardContent className="p-6">
-                <Trophy className="w-8 h-8 text-primary mb-3" />
-                <h3 className="font-display text-xl font-bold uppercase mb-1">
+                <div className="relative mb-3 h-12 flex items-center justify-center">
+                  <Trophy className="w-8 h-8 text-primary group-hover:animate-bounce-ball" />
+                </div>
+                <h3 className="font-display text-xl font-bold uppercase mb-1 group-hover:text-primary">
                   Tournaments
                 </h3>
                 <p className="text-sm text-muted-foreground">
