@@ -1,24 +1,33 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { login, signUp, getCurrentUser, logout } from "./auth";
 import { insertTurfSchema, insertTeamSchema, insertBookingSchema, insertMatchSchema, insertTournamentSchema, insertMatchInvitationSchema } from "@shared/schema";
+import jwt from "jsonwebtoken";
+import type { Request, Response, NextFunction } from "express";
+
+function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
+  const token = authHeader.replace("Bearer ", "");
+  try {
+    const user = jwt.verify(token, process.env.SESSION_SECRET || "local-dev-secret-key");
+    // @ts-ignore
+    req.user = user;
+    next();
+  } catch {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // No session middleware needed for JWT
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  app.post('/api/auth/signup', signUp);
+  app.post('/api/auth/login', login);
+  app.get('/api/auth/user', getCurrentUser);
+  app.get('/api/auth/logout', logout);
 
   // Turf routes
   app.get('/api/turfs', async (_req, res) => {
@@ -54,15 +63,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/turfs', isAuthenticated, async (req: any, res) => {
+  app.post('/api/turfs', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
-
       const validated = insertTurfSchema.parse({ ...req.body, ownerId: userId });
       const turf = await storage.createTurf(validated);
       res.status(201).json(turf);
@@ -93,10 +100,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/teams/my', isAuthenticated, async (req: any, res) => {
+  app.get('/api/teams/my', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const teams = await storage.getTeamsByCaptain(userId);
+      console.log(`[DEBUG] /api/teams/my for userId: ${userId}, result:`, teams);
       res.json(teams);
     } catch (error) {
       console.error("Error fetching teams:", error);
@@ -117,9 +125,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/teams', isAuthenticated, async (req: any, res) => {
+  app.post('/api/teams', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validated = insertTeamSchema.parse({ ...req.body, captainId: userId });
       const team = await storage.createTeam(validated);
       res.status(201).json(team);
@@ -130,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Matchmaking routes
-  app.get('/api/matchmaking/suggestions/:teamId', isAuthenticated, async (req, res) => {
+  app.get('/api/matchmaking/suggestions/:teamId', async (req, res) => {
     try {
       const teamId = req.params.teamId;
       const myTeam = await storage.getTeam(teamId);
@@ -171,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Match invitation routes
-  app.get('/api/match-invitations', isAuthenticated, async (_req, res) => {
+  app.get('/api/match-invitations', async (_req, res) => {
     try {
       const invitations = await storage.getMatchInvitations();
       res.json(invitations);
@@ -181,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/match-invitations', isAuthenticated, async (req, res) => {
+  app.post('/api/match-invitations', requireAuth, async (req, res) => {
     try {
       const validated = insertMatchInvitationSchema.parse(req.body);
       const invitation = await storage.createMatchInvitation(validated);
@@ -193,10 +201,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Booking routes
-  app.get('/api/bookings', isAuthenticated, async (req: any, res) => {
+  app.get('/api/bookings', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const bookings = await storage.getBookingsByUser(userId);
+      console.log(`[DEBUG] /api/bookings for userId: ${userId}, result:`, bookings);
       res.json(bookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
@@ -204,31 +213,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
+  app.post('/api/bookings', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      
+      const userId = req.user.id;
       // Check for overlapping bookings
       const turfBookings = await storage.getBookingsByTurf(req.body.turfId);
       const newStart = req.body.startTime;
       const newEnd = req.body.endTime;
       const newDate = req.body.bookingDate;
-      
       const hasConflict = turfBookings.some(booking => {
         if (booking.bookingDate !== newDate || booking.status === 'cancelled') {
           return false;
         }
         const existingStart = booking.startTime;
         const existingEnd = booking.endTime;
-        
         // Check overlap
         return (newStart < existingEnd && newEnd > existingStart);
       });
-
       if (hasConflict) {
         return res.status(409).json({ message: "Time slot already booked" });
       }
-
       const validated = insertBookingSchema.parse({ ...req.body, userId });
       const booking = await storage.createBooking(validated);
       res.status(201).json(booking);
@@ -249,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/matches', isAuthenticated, async (req, res) => {
+  app.post('/api/matches', async (req, res) => {
     try {
       const validated = insertMatchSchema.parse(req.body);
       const match = await storage.createMatch(validated);
@@ -260,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/matches/:id', isAuthenticated, async (req, res) => {
+  app.patch('/api/matches/:id', async (req, res) => {
     try {
       const match = await storage.updateMatch(req.params.id, req.body);
       if (!match) {
@@ -356,9 +360,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/tournaments', isAuthenticated, async (req: any, res) => {
+  app.post('/api/tournaments', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validated = insertTournamentSchema.parse({ ...req.body, organizerId: userId });
       const tournament = await storage.createTournament(validated);
       res.status(201).json(tournament);
@@ -369,15 +373,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
-  app.get('/api/admin/turfs', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/turfs', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
-
       const turfs = await storage.getTurfs();
       res.json(turfs);
     } catch (error) {
@@ -386,20 +388,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/bookings', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/bookings', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
-
       const bookings = await storage.getBookings();
       res.json(bookings);
     } catch (error) {
       console.error("Error fetching admin bookings:", error);
       res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+
+  // Admin booking status update
+  app.patch('/api/admin/bookings/:id', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const bookingId = req.params.id;
+      const { status } = req.body;
+      if (!['confirmed', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      const updated = await storage.updateBooking(bookingId, { status });
+      if (!updated) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      res.status(500).json({ message: "Failed to update booking status" });
     }
   });
 

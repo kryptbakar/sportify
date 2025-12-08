@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiFetch, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getTierColor, getTierTextColor } from "@/lib/eloUtils";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -35,7 +35,7 @@ export default function Matchmaking() {
 
   const sendInvitationMutation = useMutation({
     mutationFn: async (data: { fromTeamId: string; toTeamId: string; message: string }) => {
-      await apiRequest("POST", "/api/match-invitations", data);
+      await apiFetch("/api/match-invitations", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/match-invitations"] });

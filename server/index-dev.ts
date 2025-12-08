@@ -1,5 +1,12 @@
-import fs from "node:fs";
+import dotenv from "dotenv";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const envPath = path.resolve(__dirname, "..", ".env.local");
+dotenv.config({ path: envPath });
+
+import fs from "node:fs";
 import { type Server } from "node:http";
 
 import { nanoid } from "nanoid";

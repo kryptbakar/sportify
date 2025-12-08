@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -46,6 +48,16 @@ export default function Admin() {
   const { data: bookings } = useQuery<Booking[]>({
     queryKey: ["/api/admin/bookings"],
     enabled: !!user?.isAdmin,
+  });
+
+  // Mutation for booking status
+  const updateBookingStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      await apiRequest("PATCH", `/api/admin/bookings/${id}`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/bookings"] });
+    },
   });
 
   const { data: teams } = useQuery<Team[]>({
@@ -202,8 +214,24 @@ export default function Admin() {
                           <div className="font-mono font-semibold">${booking.totalPrice}</div>
                           {booking.status === 'pending' && (
                             <div className="flex gap-2">
-                              <Button size="sm" variant="default" data-testid={`button-approve-${booking.id}`}>Approve</Button>
-                              <Button size="sm" variant="destructive" data-testid={`button-reject-${booking.id}`}>Reject</Button>
+                              <Button
+                                size="sm"
+                                variant="default"
+                                data-testid={`button-approve-${booking.id}`}
+                                disabled={updateBookingStatus.isPending}
+                                onClick={() => updateBookingStatus.mutate({ id: booking.id, status: "confirmed" })}
+                              >
+                                {updateBookingStatus.isPending ? "Approving..." : "Approve"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                data-testid={`button-reject-${booking.id}`}
+                                disabled={updateBookingStatus.isPending}
+                                onClick={() => updateBookingStatus.mutate({ id: booking.id, status: "rejected" })}
+                              >
+                                {updateBookingStatus.isPending ? "Rejecting..." : "Reject"}
+                              </Button>
                             </div>
                           )}
                         </div>

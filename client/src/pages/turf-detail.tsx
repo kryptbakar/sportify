@@ -8,7 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiFetch, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { generateTimeSlots, isSlotAvailable, formatTime } from "@/lib/bookingUtils";
 import { MapPin, DollarSign, Calendar as CalendarIcon, Clock, ArrowLeft } from "lucide-react";
@@ -55,7 +55,7 @@ export default function TurfDetail() {
 
   const createBookingMutation = useMutation({
     mutationFn: async (data: InsertBooking) => {
-      await apiRequest("POST", "/api/bookings", data);
+      await apiFetch("/api/bookings", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/turfs", id, "bookings"] });
@@ -104,7 +104,7 @@ export default function TurfDetail() {
     createBookingMutation.mutate({
       turfId: turf.id,
       userId: "", // Will be set by backend
-      teamId: selectedTeamId || null,
+      teamId: selectedTeamId === "personal" ? null : selectedTeamId || null,
       bookingDate: selectedDate.toISOString().split('T')[0],
       startTime: selectedStartTime,
       endTime,
@@ -278,7 +278,7 @@ export default function TurfDetail() {
                         <SelectValue placeholder="Personal booking" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Personal booking</SelectItem>
+                        <SelectItem value="personal">Personal booking</SelectItem>
                         {myTeams.map((team) => (
                           <SelectItem key={team.id} value={team.id}>
                             {team.name}

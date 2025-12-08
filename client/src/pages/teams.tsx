@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTeamSchema, type Team, type InsertTeam } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiFetch, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getTierColor, getTierTextColor } from "@/lib/eloUtils";
 import { Users, Trophy, Target, Plus } from "lucide-react";
@@ -39,7 +39,7 @@ export default function Teams() {
 
   const createTeamMutation = useMutation({
     mutationFn: async (data: InsertTeam) => {
-      await apiRequest("POST", "/api/teams", { ...data, captainId: user?.id });
+      await apiFetch("/api/teams", { method: "POST", body: JSON.stringify({ ...data, captainId: user?.id }), headers: { "Content-Type": "application/json" } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });

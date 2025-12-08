@@ -1,0 +1,29 @@
+{
+  "version": "2",
+  "$schema": "https://railway.app/json-schema/railway-schema.json",
+  "services": [
+    {
+      "name": "sportify-postgres",
+      "source": {
+        "repo": "https://github.com/railway/starters/tree/main/examples/postgres"
+      },
+      "attributes": {
+        "icon": "database"
+      }
+    },
+    {
+      "name": "sportify-backend",
+      "source": {
+        "repo": "."
+      },
+      "servicePort": 5000,
+      "startCommand": "npm run start",
+      "buildCommand": "npm run build"
+    }
+  ],
+  "plugins": [
+    {
+      "source": "@railway/postgres-plugin"
+    }
+  ]
+}
