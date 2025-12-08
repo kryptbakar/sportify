@@ -1,4 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +11,25 @@ import { FootballPitch, FootballBall, PlayerMarker } from "@/components/football
 
 export default function Home() {
   const { user } = useAuth();
+  const jwt = typeof window !== "undefined" ? localStorage.getItem("jwt") : null;
+  // Fetch user's teams
+  const { data: myTeams, isLoading: teamsLoading } = useQuery({
+    queryKey: ["/api/teams/my"],
+    enabled: !!user,
+    queryFn: async () => {
+      const res = await apiFetch("/api/teams/my");
+      return res.json();
+    },
+  });
+  // Fetch user's bookings
+  const { data: myBookings, isLoading: bookingsLoading } = useQuery({
+    queryKey: ["/api/bookings"],
+    enabled: !!user,
+    queryFn: async () => {
+      const res = await apiFetch("/api/bookings");
+      return res.json();
+    },
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,13 +146,33 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-                  <p className="text-muted-foreground mb-4">No upcoming bookings</p>
-                  <Link href="/turfs">
-                    <Button data-testid="button-browse-turfs">Browse Turfs</Button>
-                  </Link>
-                </div>
+                {bookingsLoading ? (
+                  <div className="text-center py-12">Loading bookings...</div>
+                ) : myBookings && myBookings.length > 0 ? (
+                  <div className="space-y-4">
+                    {myBookings.slice(0, 3).map((booking: any) => (
+                      <Card key={booking.id} className="mb-2">
+                        <CardContent className="p-4 flex flex-col gap-2">
+                          <div className="font-bold">Turf: {booking.turfName || booking.turfId}</div>
+                          <div>Date: {booking.bookingDate}</div>
+                          <div>Time: {booking.startTime} - {booking.endTime}</div>
+                          <div>Status: {booking.status}</div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    <Link href="/turfs">
+                      <Button data-testid="button-browse-turfs">Browse Turfs</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
+                    <p className="text-muted-foreground mb-4">No upcoming bookings</p>
+                    <Link href="/turfs">
+                      <Button data-testid="button-browse-turfs">Browse Turfs</Button>
+                    </Link>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -142,6 +184,7 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* You can add recent matches logic here if available */}
                 <div className="text-center py-12">
                   <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
                   <p className="text-muted-foreground mb-4">No matches played yet</p>
@@ -163,13 +206,32 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-                  <p className="text-muted-foreground text-sm mb-3">No teams yet</p>
-                  <Link href="/teams">
-                    <Button size="sm" data-testid="button-create-team">Create Team</Button>
-                  </Link>
-                </div>
+                {teamsLoading ? (
+                  <div className="text-center py-8">Loading teams...</div>
+                ) : myTeams && myTeams.length > 0 ? (
+                  <div className="space-y-4">
+                    {myTeams.slice(0, 2).map((team: any) => (
+                      <Card key={team.id} className="mb-2">
+                        <CardContent className="p-4 flex flex-col gap-2">
+                          <div className="font-bold">{team.name}</div>
+                          <div>ELO: {team.eloRating}</div>
+                          <div>Wins: {team.wins} | Losses: {team.losses}</div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    <Link href="/teams">
+                      <Button size="sm" data-testid="button-create-team">Manage Teams</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
+                    <p className="text-muted-foreground text-sm mb-3">No teams yet</p>
+                    <Link href="/teams">
+                      <Button size="sm" data-testid="button-create-team">Create Team</Button>
+                    </Link>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

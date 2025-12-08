@@ -10,11 +10,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
+import { useCallback } from "react";
 import { Trophy, Calendar, Users, TrendingUp, Sparkles, Shield } from "lucide-react";
 
 export function Navbar() {
   const { user } = useAuth();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  const handleLogout = useCallback(async () => {
+    localStorage.removeItem("jwt");
+    await fetch("/api/auth/logout");
+    setLocation("/auth");
+  }, [setLocation]);
 
   const navItems = [
     { href: "/", label: "Home", icon: null },
@@ -39,7 +46,7 @@ export function Navbar() {
             <div className="flex items-center gap-2 cursor-pointer hover-elevate px-3 py-1 rounded-md" data-testid="link-logo">
               <Trophy className="w-6 h-6 text-primary" />
               <span className="font-display text-2xl font-bold uppercase tracking-wide">
-                TurfBook
+                SportiFY
               </span>
             </div>
           </Link>
@@ -78,7 +85,6 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full" data-testid="button-user-menu">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
                     <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                       {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
                     </AvatarFallback>
@@ -99,10 +105,14 @@ export function Navbar() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <a href="/api/logout" className="cursor-pointer" data-testid="menu-logout">
+                <DropdownMenuItem>
+                  <button
+                    onClick={handleLogout}
+                    className="cursor-pointer w-full text-left bg-transparent border-0 p-0 m-0"
+                    data-testid="menu-logout"
+                  >
                     Log Out
-                  </a>
+                  </button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
