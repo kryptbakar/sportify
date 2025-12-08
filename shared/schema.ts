@@ -289,6 +289,8 @@ export const insertTurfSchema = createInsertSchema(turfs).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  pricePerHour: z.union([z.string(), z.number()]).pipe(z.coerce.string()),
 });
 
 export const insertTeamSchema = createInsertSchema(teams).omit({
