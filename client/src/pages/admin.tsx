@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
@@ -8,11 +8,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Calendar, Users, Trophy, DollarSign, TrendingUp, MapPin } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Shield, Calendar, Users, Trophy, DollarSign, TrendingUp, MapPin, X } from "lucide-react";
 import type { Turf, Booking, Team, Tournament } from "@shared/schema";
 
 export default function Admin() {
   const { user, isLoading, isAuthenticated } = useAuth();
+  const [isAddTurfOpen, setIsAddTurfOpen] = useState(false);
+  const [turfForm, setTurfForm] = useState({
+    name: "",
+    description: "",
+    location: "",
+    address: "",
+    turfType: "5-a-side",
+    pricePerHour: "",
+    imageUrl: "",
+  });
   const { toast } = useToast();
 
   // Redirect if not admin
@@ -48,6 +67,41 @@ export default function Admin() {
   const { data: bookings } = useQuery<Booking[]>({
     queryKey: ["/api/admin/bookings"],
     enabled: !!user?.isAdmin,
+  });
+
+  // Mutation for creating turf
+  const createTurfMutation = useMutation({
+    mutationFn: async (data: typeof turfForm) => {
+      const payload = {
+        ...data,
+        pricePerHour: parseFloat(data.pricePerHour),
+      };
+      return await apiRequest("POST", "/api/turfs", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/turfs"] });
+      setIsAddTurfOpen(false);
+      setTurfForm({
+        name: "",
+        description: "",
+        location: "",
+        address: "",
+        turfType: "5-a-side",
+        pricePerHour: "",
+        imageUrl: "",
+      });
+      toast({
+        title: "Success",
+        description: "Turf created successfully!",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create turf",
+        variant: "destructive",
+      });
+    },
   });
 
   // Mutation for booking status
@@ -153,7 +207,12 @@ export default function Admin() {
             <Card data-testid="card-turfs-management">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="font-display text-2xl uppercase">Turf Management</CardTitle>
-                <Button data-testid="button-add-turf">Add Turf</Button>
+                <Button 
+                  data-testid="button-add-turf"
+                  onClick={() => setIsAddTurfOpen(true)}
+                >
+                  Add Turf
+                </Button>
               </CardHeader>
               <CardContent>
                 {turfs && turfs.length > 0 ? (
@@ -317,6 +376,121 @@ export default function Admin() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Add Turf Dialog */}
+        <Dialog open={isAddTurfOpen} onOpenChange={setIsAddTurfOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Turf</DialogTitle>
+              <DialogDescription>
+                Create a new turf listing for your platform
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createTurfMutation.mutate(turfForm);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <Label htmlFor="name">Turf Name</Label>
+                <Input
+                  id="name"
+                  required
+                  value={turfForm.name}
+                  onChange={(e) => setTurfForm({ ...turfForm, name: e.target.value })}
+                  placeholder="e.g., Downtown Sports Complex"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  required
+                  value={turfForm.location}
+                  onChange={(e) => setTurfForm({ ...turfForm, location: e.target.value })}
+                  placeholder="e.g., Downtown"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  required
+                  value={turfForm.address}
+                  onChange={(e) => setTurfForm({ ...turfForm, address: e.target.value })}
+                  placeholder="Full address"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  value={turfForm.description}
+                  onChange={(e) => setTurfForm({ ...turfForm, description: e.target.value })}
+                  placeholder="Describe the turf facility"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="turfType">Turf Type</Label>
+                <select
+                  id="turfType"
+                  value={turfForm.turfType}
+                  onChange={(e) => setTurfForm({ ...turfForm, turfType: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                >
+                  <option value="5-a-side">5-a-side</option>
+                  <option value="7-a-side">7-a-side</option>
+                  <option value="11-a-side">11-a-side</option>
+                </select>
+              </div>
+
+              <div>
+                <Label htmlFor="pricePerHour">Price Per Hour ($)</Label>
+                <Input
+                  id="pricePerHour"
+                  type="number"
+                  step="0.01"
+                  required
+                  value={turfForm.pricePerHour}
+                  onChange={(e) => setTurfForm({ ...turfForm, pricePerHour: e.target.value })}
+                  placeholder="50.00"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <Input
+                  id="imageUrl"
+                  value={turfForm.imageUrl}
+                  onChange={(e) => setTurfForm({ ...turfForm, imageUrl: e.target.value })}
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddTurfOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createTurfMutation.isPending}
+                >
+                  {createTurfMutation.isPending ? "Creating..." : "Create Turf"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
