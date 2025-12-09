@@ -200,6 +200,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/match-invitations/:id/accept', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const invitation = await storage.getMatchInvitation(id);
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      const updated = await storage.updateMatchInvitation(id, { status: "accepted" });
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error accepting invitation:", error);
+      res.status(400).json({ message: error.message || "Failed to accept invitation" });
+    }
+  });
+
+  app.patch('/api/match-invitations/:id/decline', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const invitation = await storage.getMatchInvitation(id);
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      const updated = await storage.updateMatchInvitation(id, { status: "declined" });
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error declining invitation:", error);
+      res.status(400).json({ message: error.message || "Failed to decline invitation" });
+    }
+  });
+
   // Booking routes
   app.get('/api/bookings', requireAuth, async (req: any, res) => {
     try {
