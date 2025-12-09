@@ -79,6 +79,7 @@ export interface IStorage {
 
   // Match invitation operations
   getMatchInvitations(): Promise<MatchInvitation[]>;
+  getMatchInvitation(id: string): Promise<MatchInvitation | undefined>;
   getMatchInvitationsByTeam(teamId: string): Promise<MatchInvitation[]>;
   createMatchInvitation(invitation: InsertMatchInvitation): Promise<MatchInvitation>;
   updateMatchInvitation(id: string, invitation: Partial<InsertMatchInvitation>): Promise<MatchInvitation | undefined>;
@@ -275,6 +276,11 @@ export class DatabaseStorage implements IStorage {
   // Match invitation operations
   async getMatchInvitations(): Promise<MatchInvitation[]> {
     return await db.select().from(matchInvitations).orderBy(desc(matchInvitations.createdAt));
+  }
+
+  async getMatchInvitation(id: string): Promise<MatchInvitation | undefined> {
+    const [invitation] = await db.select().from(matchInvitations).where(eq(matchInvitations.id, id));
+    return invitation;
   }
 
   async getMatchInvitationsByTeam(teamId: string): Promise<MatchInvitation[]> {
