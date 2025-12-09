@@ -85,6 +85,56 @@ export default function Challenges() {
     createInvitationMutation.mutate(data);
   };
 
+  const acceptChallenge = (challengeId: string) => {
+    // Call API to accept challenge
+    fetch(`/api/match-invitations/${challengeId}/accept`, {
+      method: "PATCH",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to accept challenge");
+        return res.json();
+      })
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/match-invitations"] });
+        toast({
+          title: "Challenge accepted!",
+          description: "You have accepted the challenge.",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Failed to accept challenge.",
+          variant: "destructive",
+        });
+      });
+  };
+
+  const declineChallenge = (challengeId: string) => {
+    // Call API to decline challenge
+    fetch(`/api/match-invitations/${challengeId}/decline`, {
+      method: "PATCH",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to decline challenge");
+        return res.json();
+      })
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/match-invitations"] });
+        toast({
+          title: "Challenge declined!",
+          description: "You have declined the challenge.",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Failed to decline challenge.",
+          variant: "destructive",
+        });
+      });
+  };
+
   const receivedChallenges = invitations?.filter(
     (inv) => myTeams?.some((t) => t.id === inv.toTeamId) && inv.status === "pending"
   ) || [];
@@ -218,11 +268,20 @@ export default function Challenges() {
                         <Badge>Pending</Badge>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" className="gap-2">
+                        <Button
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => acceptChallenge(challenge.id)}
+                        >
                           <CheckCircle className="w-4 h-4" />
                           Accept
                         </Button>
-                        <Button size="sm" variant="outline" className="gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          onClick={() => declineChallenge(challenge.id)}
+                        >
                           <XCircle className="w-4 h-4" />
                           Decline
                         </Button>
