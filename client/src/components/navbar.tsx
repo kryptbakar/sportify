@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { useCallback } from "react";
-import { Trophy, Calendar, Users, TrendingUp, Sparkles, Shield } from "lucide-react";
+import { Trophy, Calendar, Users, TrendingUp, Sparkles, Shield, Swords } from "lucide-react";
 
 export function Navbar() {
   const { user } = useAuth();
@@ -28,6 +28,7 @@ export function Navbar() {
     { href: "/turfs", label: "Turfs", icon: Calendar },
     { href: "/teams", label: "Teams", icon: Users },
     { href: "/matchmaking", label: "Match", icon: Sparkles },
+    { href: "/challenges", label: "Challenges", icon: Swords },
     { href: "/tournaments", label: "Tournaments", icon: Trophy },
     { href: "/rankings", label: "Rankings", icon: TrendingUp },
   ];

@@ -14,6 +14,7 @@ import Teams from "@/pages/teams";
 import Matchmaking from "@/pages/matchmaking";
 import Tournaments from "@/pages/tournaments";
 import Rankings from "@/pages/rankings";
+import Challenges from "@/pages/challenges";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -36,6 +37,7 @@ function AppRouter() {
             <Route path="/turfs/:id" component={TurfDetail} />
             <Route path="/teams" component={Teams} />
             <Route path="/matchmaking" component={Matchmaking} />
+            <Route path="/challenges" component={Challenges} />
             <Route path="/tournaments" component={Tournaments} />
             <Route path="/rankings" component={Rankings} />
             <Route path="/admin" component={Admin} />
