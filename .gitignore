@@ -14,3 +14,4 @@ vite.config.ts.*
 .local/
 db_push.log
 *.log
+.vercel

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { useCallback } from "react";
-import { Trophy, Calendar, Users, TrendingUp, Sparkles, Shield, Swords } from "lucide-react";
+import { Trophy, Calendar, Users, TrendingUp, Sparkles, Shield, Swords, MapPin } from "lucide-react";
 
 export function Navbar() {
   const { user } = useAuth();
@@ -81,6 +81,13 @@ export function Navbar() {
                 </Button>
               </Link>
             )}
+
+            <Link href="/owner">
+              <Button variant="outline" size="sm" className="gap-2" data-testid="nav-owner">
+                <MapPin className="w-4 h-4" />
+                <span className="hidden sm:inline">My Turfs</span>
+              </Button>
+            </Link>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

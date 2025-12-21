@@ -233,10 +233,6 @@ export default function Teams() {
                         <span className="ml-1 font-medium">{team.goalsScored} / {team.goalsConceded}</span>
                       </div>
                     </div>
-
-                    <Button className="w-full mt-4" variant="outline" data-testid={`button-view-team-${team.id}`}>
-                      View Details
-                    </Button>
                   </div>
                 </CardContent>
               </Card>

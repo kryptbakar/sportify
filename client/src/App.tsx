@@ -16,6 +16,7 @@ import Tournaments from "@/pages/tournaments";
 import Rankings from "@/pages/rankings";
 import Challenges from "@/pages/challenges";
 import Admin from "@/pages/admin";
+import OwnerDashboard from "@/pages/owner-dashboard";
 import NotFound from "@/pages/not-found";
 
 function AppRouter() {
@@ -41,6 +42,7 @@ function AppRouter() {
             <Route path="/tournaments" component={Tournaments} />
             <Route path="/rankings" component={Rankings} />
             <Route path="/admin" component={Admin} />
+            <Route path="/owner" component={OwnerDashboard} />
           </>
         )}
         <Route component={NotFound} />
