@@ -1,16 +1,18 @@
 import { useAuth } from "@/hooks/useAuth";
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/queryClient";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiFetch, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, Users, TrendingUp, Sparkles, Goal } from "lucide-react";
+import { Trophy, Calendar, Users, TrendingUp, Sparkles, Goal, X } from "lucide-react";
 import { Link } from "wouter";
 import { FootballPitch, FootballBall, PlayerMarker } from "@/components/football-pitch";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const jwt = typeof window !== "undefined" ? localStorage.getItem("jwt") : null;
   // Fetch user's teams
   const { data: myTeams, isLoading: teamsLoading } = useQuery({
@@ -28,6 +30,30 @@ export default function Home() {
     queryFn: async () => {
       const res = await apiFetch("/api/bookings");
       return res.json();
+    },
+  });
+
+  // Cancel booking mutation
+  const cancelBookingMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
+      const res = await apiFetch(`/api/bookings/${bookingId}/cancel`, {
+        method: "PATCH",
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
+      toast({
+        title: "Booking Cancelled",
+        description: "Your booking has been cancelled successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to cancel booking",
+        variant: "destructive",
+      });
     },
   });
 
@@ -92,7 +118,7 @@ export default function Home() {
                   </div>
                 </div>
                 <h3 className="font-display text-xl font-bold uppercase mb-1 group-hover:text-primary">
-                  My Teams
+                  Teams
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Manage your squads
@@ -146,24 +172,43 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {bookingsLoading ? (
-                  <div className="text-center py-12">Loading bookings...</div>
-                ) : myBookings && myBookings.length > 0 ? (
-                  <div className="space-y-4">
-                    {myBookings.slice(0, 3).map((booking: any) => (
-                      <Card key={booking.id} className="mb-2">
-                        <CardContent className="p-4 flex flex-col gap-2">
-                          <div className="font-bold">Turf: {booking.turfName || booking.turfId}</div>
-                          <div>Date: {booking.bookingDate}</div>
-                          <div>Time: {booking.startTime} - {booking.endTime}</div>
-                          <div>Status: {booking.status}</div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    <Link href="/turfs">
-                      <Button data-testid="button-browse-turfs">Browse Turfs</Button>
-                    </Link>
-                  </div>
+              {isLoading ? (
+                <div className="text-center py-12">Loading bookings...</div>
+              ) : myBookings && myBookings.length > 0 ? (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {myBookings.map((booking: any) => (
+                    <Card key={booking.id} className="mb-2">
+                      <CardContent className="p-4 flex flex-col gap-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-bold">{booking.turfName || 'Unknown Turf'}</div>
+                            <div className="text-sm text-muted-foreground">Date: {booking.bookingDate}</div>
+                            <div className="text-sm text-muted-foreground">Time: {booking.startTime} - {booking.endTime}</div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge variant={booking.status === 'confirmed' ? 'default' : booking.status === 'pending' ? 'secondary' : 'outline'}>
+                              {booking.status}
+                            </Badge>
+                            {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => cancelBookingMutation.mutate(booking.id)}
+                                disabled={cancelBookingMutation.isPending}
+                              >
+                                <X className="w-4 h-4 mr-1" />
+                                Cancel
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <Link href="/turfs">
+                    <Button data-testid="button-browse-turfs">Browse Turfs</Button>
+                  </Link>
+                </div>
                 ) : (
                   <div className="text-center py-12">
                     <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
@@ -202,7 +247,7 @@ export default function Home() {
               <CardHeader>
                 <CardTitle className="font-display text-2xl uppercase flex items-center gap-2">
                   <Users className="w-6 h-6" />
-                  My Teams
+                  Teams
                 </CardTitle>
               </CardHeader>
               <CardContent>

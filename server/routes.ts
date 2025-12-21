@@ -235,8 +235,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const bookings = await storage.getBookingsByUser(userId);
-      console.log(`[DEBUG] /api/bookings for userId: ${userId}, result:`, bookings);
-      res.json(bookings);
+      
+      // Fetch turf names for each booking
+      const bookingsWithTurfNames = await Promise.all(
+        bookings.map(async (booking) => {
+          const turf = await storage.getTurf(booking.turfId);
+          return { ...booking, turfName: turf?.name || 'Unknown Turf' };
+        })
+      );
+      
+      console.log(`[DEBUG] /api/bookings for userId: ${userId}, result:`, bookingsWithTurfNames);
+      res.json(bookingsWithTurfNames);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       res.status(500).json({ message: "Failed to fetch bookings" });
@@ -399,6 +408,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating tournament:", error);
       res.status(400).json({ message: error.message || "Failed to create tournament" });
+    }
+  });
+
+  // Turf Owner routes - get bookings for turfs owned by the user
+  app.get('/api/owner/bookings', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      // Get all turfs owned by this user
+      const allTurfs = await storage.getTurfs();
+      const ownedTurfs = allTurfs.filter(t => t.ownerId === userId);
+      
+      if (ownedTurfs.length === 0) {
+        return res.json([]);
+      }
+      
+      // Get all bookings for owned turfs
+      const allBookings: any[] = [];
+      for (const turf of ownedTurfs) {
+        const turfBookings = await storage.getBookingsByTurf(turf.id);
+        // Add turf name to each booking
+        const bookingsWithTurf = turfBookings.map(b => ({ ...b, turfName: turf.name }));
+        allBookings.push(...bookingsWithTurf);
+      }
+      
+      // Sort by booking date
+      allBookings.sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime());
+      
+      res.json(allBookings);
+    } catch (error) {
+      console.error("Error fetching owner bookings:", error);
+      res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+
+  // Turf Owner - update booking status (accept/reject)
+  app.patch('/api/owner/bookings/:id', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const bookingId = req.params.id;
+      const { status } = req.body;
+      
+      if (!['confirmed', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      // Get the booking
+      const booking = await storage.getBooking(bookingId);
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      // Verify the user owns the turf
+      const turf = await storage.getTurf(booking.turfId);
+      if (!turf || turf.ownerId !== userId) {
+        // Check if user is admin
+        const user = await storage.getUser(userId);
+        if (!user?.isAdmin) {
+          return res.status(403).json({ message: "Access denied - not the turf owner" });
+        }
+      }
+      
+      const updated = await storage.updateBooking(bookingId, { status });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      res.status(500).json({ message: "Failed to update booking status" });
+    }
+  });
+
+  // User cancel booking
+  app.patch('/api/bookings/:id/cancel', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const bookingId = req.params.id;
+      
+      // Get the booking
+      const booking = await storage.getBooking(bookingId);
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      // Verify the user owns the booking
+      if (booking.userId !== userId) {
+        return res.status(403).json({ message: "Access denied - not your booking" });
+      }
+      
+      // Only pending or confirmed bookings can be cancelled
+      if (!['pending', 'confirmed'].includes(booking.status)) {
+        return res.status(400).json({ message: "Cannot cancel this booking" });
+      }
+      
+      const updated = await storage.updateBooking(bookingId, { status: 'cancelled' });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      res.status(500).json({ message: "Failed to cancel booking" });
     }
   });
 
