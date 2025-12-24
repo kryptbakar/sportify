@@ -172,7 +172,7 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-              {isLoading ? (
+              {bookingsLoading ? (
                 <div className="text-center py-12">Loading bookings...</div>
               ) : myBookings && myBookings.length > 0 ? (
                 <div className="space-y-4 max-h-96 overflow-y-auto">
