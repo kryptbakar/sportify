@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Shield, Calendar, Users, Trophy, DollarSign, TrendingUp, MapPin, X } from "lucide-react";
+import { Shield, Calendar, Users, Trophy, Banknote, TrendingUp, MapPin, X } from "lucide-react";
 import type { Turf, Booking, Team, Tournament } from "@shared/schema";
 
 export default function Admin() {
@@ -185,10 +185,10 @@ export default function Admin() {
           <Card data-testid="card-stat-revenue">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <DollarSign className="w-8 h-8 text-primary" />
+                <Banknote className="w-8 h-8 text-primary" />
                 <TrendingUp className="w-5 h-5 text-green-600" />
               </div>
-              <div className="font-display text-2xl font-bold uppercase">${totalRevenue.toFixed(2)}</div>
+              <div className="font-display text-2xl font-bold uppercase">PKR {totalRevenue.toFixed(2)}</div>
               <p className="text-sm text-muted-foreground">Total revenue</p>
             </CardContent>
           </Card>
@@ -225,7 +225,7 @@ export default function Admin() {
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <div className="font-mono font-semibold">${turf.pricePerHour}/hr</div>
+                            <div className="font-mono font-semibold">PKR {turf.pricePerHour}/hr</div>
                             <Badge variant={turf.isActive ? "default" : "secondary"}>
                               {turf.isActive ? "Active" : "Inactive"}
                             </Badge>
@@ -270,7 +270,7 @@ export default function Admin() {
                           >
                             {booking.status}
                           </Badge>
-                          <div className="font-mono font-semibold">${booking.totalPrice}</div>
+                          <div className="font-mono font-semibold">PKR {booking.totalPrice}</div>
                           {booking.status === 'pending' && (
                             <div className="flex gap-2">
                               <Button
@@ -451,7 +451,7 @@ export default function Admin() {
               </div>
 
               <div>
-                <Label htmlFor="pricePerHour">Price Per Hour ($)</Label>
+                <Label htmlFor="pricePerHour">Price Per Hour (PKR)</Label>
                 <Input
                   id="pricePerHour"
                   type="number"
@@ -459,7 +459,7 @@ export default function Admin() {
                   required
                   value={turfForm.pricePerHour}
                   onChange={(e) => setTurfForm({ ...turfForm, pricePerHour: e.target.value })}
-                  placeholder="50.00"
+                  placeholder="5000"
                 />
               </div>
 

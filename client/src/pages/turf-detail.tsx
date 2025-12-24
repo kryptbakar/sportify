@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiFetch, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { generateTimeSlots, isSlotAvailable, formatTime } from "@/lib/bookingUtils";
-import { MapPin, DollarSign, Calendar as CalendarIcon, Clock, ArrowLeft } from "lucide-react";
+import { MapPin, Banknote, Calendar as CalendarIcon, Clock, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { Turf, Booking, Team, InsertBooking } from "@shared/schema";
 
@@ -187,9 +187,9 @@ export default function TurfDetail() {
 
                 <div className="mb-6 pb-6 border-b">
                   <div className="flex items-center gap-2 mb-2">
-                    <DollarSign className="w-6 h-6 text-primary" />
+                    <Banknote className="w-6 h-6 text-primary" />
                     <span className="font-mono text-3xl font-bold" data-testid="text-turf-price">
-                      ${turf.pricePerHour}
+                      PKR {turf.pricePerHour}
                     </span>
                     <span className="text-muted-foreground">/ hour</span>
                   </div>
@@ -322,7 +322,7 @@ export default function TurfDetail() {
                       <div className="flex justify-between pt-2 border-t border-primary/20">
                         <span className="font-semibold">Total:</span>
                         <span className="font-mono font-bold text-lg text-primary">
-                          ${(parseFloat(turf.pricePerHour) * selectedDuration / 60).toFixed(2)}
+                          PKR {(parseFloat(turf.pricePerHour) * selectedDuration / 60).toFixed(2)}
                         </span>
                       </div>
                     </div>
