@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, DollarSign, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, MapPin, Banknote, CheckCircle, XCircle } from "lucide-react";
 import type { Booking, Turf } from "@shared/schema";
 
 export default function OwnerDashboard() {
@@ -136,9 +136,9 @@ export default function OwnerDashboard() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <DollarSign className="w-8 h-8 text-primary" />
+                <Banknote className="w-8 h-8 text-primary" />
               </div>
-              <div className="font-display text-2xl font-bold uppercase">${totalRevenue.toFixed(2)}</div>
+              <div className="font-display text-2xl font-bold uppercase">PKR {totalRevenue.toFixed(2)}</div>
               <p className="text-sm text-muted-foreground">Total confirmed revenue</p>
             </CardContent>
           </Card>
@@ -166,7 +166,7 @@ export default function OwnerDashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="font-mono font-semibold">${booking.totalPrice}</div>
+                      <div className="font-mono font-semibold">PKR {booking.totalPrice}</div>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -227,7 +227,7 @@ export default function OwnerDashboard() {
                       >
                         {booking.status}
                       </Badge>
-                      <div className="font-mono font-semibold">${booking.totalPrice}</div>
+                      <div className="font-mono font-semibold">PKR {booking.totalPrice}</div>
                     </div>
                   </div>
                 ))}

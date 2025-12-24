@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Calendar, DollarSign, Search } from "lucide-react";
+import { MapPin, Calendar, Banknote, Search } from "lucide-react";
 import { Link } from "wouter";
 import type { Turf } from "@shared/schema";
 
@@ -112,8 +112,8 @@ export default function Turfs() {
                       <span className="truncate" data-testid={`text-turf-location-${turf.id}`}>{turf.location}</span>
                     </div>
                     <div className="flex items-center text-sm font-semibold">
-                      <DollarSign className="w-4 h-4 mr-2 shrink-0 text-primary" />
-                      <span data-testid={`text-turf-price-${turf.id}`}>${turf.pricePerHour}/hour</span>
+                      <Banknote className="w-4 h-4 mr-2 shrink-0 text-primary" />
+                      <span data-testid={`text-turf-price-${turf.id}`}>PKR {turf.pricePerHour}/hour</span>
                     </div>
                   </div>
 

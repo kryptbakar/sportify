@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Calendar, MapPin, Users, DollarSign, Clock } from "lucide-react";
+import { Trophy, Calendar, MapPin, Users, Banknote, Clock } from "lucide-react";
 import { formatDate } from "@/lib/bookingUtils";
 import type { Tournament } from "@shared/schema";
 
@@ -61,8 +61,8 @@ export default function Tournaments() {
             </div>
             {tournament.entryFee && (
               <div className="flex items-center text-sm">
-                <DollarSign className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">Entry: ${tournament.entryFee}</span>
+                <Banknote className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">Entry: PKR {tournament.entryFee}</span>
               </div>
             )}
             {tournament.prizeInfo && (
