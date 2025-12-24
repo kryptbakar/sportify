@@ -411,6 +411,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Turf Owner routes - get turfs owned by the user
+  app.get('/api/owner/turfs', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const allTurfs = await storage.getTurfs();
+      const ownedTurfs = allTurfs.filter(t => t.ownerId === userId);
+      res.json(ownedTurfs);
+    } catch (error) {
+      console.error("Error fetching owner turfs:", error);
+      res.status(500).json({ message: "Failed to fetch turfs" });
+    }
+  });
+
+  // Turf Owner - update turf details
+  app.patch('/api/owner/turfs/:id', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const turfId = req.params.id;
+      const updateData = req.body;
+      
+      // Get the turf
+      const turf = await storage.getTurf(turfId);
+      if (!turf) {
+        return res.status(404).json({ message: "Turf not found" });
+      }
+      
+      // Verify the user owns the turf
+      if (turf.ownerId !== userId) {
+        // Check if user is admin
+        const user = await storage.getUser(userId);
+        if (!user?.isAdmin) {
+          return res.status(403).json({ message: "Access denied - not the turf owner" });
+        }
+      }
+      
+      // Update the turf
+      const updated = await storage.updateTurf(turfId, updateData);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating turf:", error);
+      res.status(500).json({ message: "Failed to update turf" });
+    }
+  });
+
   // Turf Owner routes - get bookings for turfs owned by the user
   app.get('/api/owner/bookings', requireAuth, async (req: any, res) => {
     try {
