@@ -87,7 +87,7 @@ export default function Challenges() {
 
   const acceptChallenge = (challengeId: string) => {
     // Call API to accept challenge
-    fetch(`/api/match-invitations/${challengeId}/accept`, {
+    apiFetch(`/api/match-invitations/${challengeId}/accept`, {
       method: "PATCH",
     })
       .then((res) => {
@@ -112,7 +112,7 @@ export default function Challenges() {
 
   const declineChallenge = (challengeId: string) => {
     // Call API to decline challenge
-    fetch(`/api/match-invitations/${challengeId}/decline`, {
+    apiFetch(`/api/match-invitations/${challengeId}/decline`, {
       method: "PATCH",
     })
       .then((res) => {
