@@ -4,6 +4,9 @@
 [![Vite](https://img.shields.io/badge/Vite-Frontend-646CFF)](https://vitejs.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791)](https://www.postgresql.org/)
 
+## Project Description
+Sports-themed web application built with TypeScript - delivering an interactive experience around sports content, tracking, or discovery.
+
 ---
 
 ## 🚀 Project Overview
