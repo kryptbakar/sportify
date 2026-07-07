@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sportify (TURF MAX) — Sports Booking &amp; Match Platform</title>
+<meta name="description" content="Sportify (TURF MAX) — a full-stack sports booking and match-management platform for turf reservations, teams, matchmaking and tournaments.">
+<style>
+  :root{
+    --bg:#f7f8fb;
+    --bg-alt:#ffffff;
+    --text:#151821;
+    --text-dim:#565f77;
+    --accent:#ff5a36;
+    --accent-2:#00c2a8;
+    --border:#e6e8ef;
+    --card:#ffffff;
+    --shadow: 0 8px 24px rgba(21,24,33,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0d0f14;
+      --bg-alt:#151822;
+      --text:#eef0f6;
+      --text-dim:#9aa3b8;
+      --accent:#ff6a45;
+      --accent-2:#2fe0c4;
+      --border:#252a38;
+      --card:#151822;
+      --shadow: 0 8px 28px rgba(0,0,0,0.45);
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  header.hero{
+    padding:96px 0 72px;
+    background:
+      radial-gradient(1200px 500px at 15% -10%, rgba(255,90,54,0.16), transparent 60%),
+      radial-gradient(900px 400px at 90% 0%, rgba(0,194,168,0.14), transparent 55%);
+    border-bottom:1px solid var(--border);
+    text-align:center;
+  }
+  .badge{
+    display:inline-block;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:var(--accent);
+    background:rgba(255,90,54,0.12);
+    border:1px solid rgba(255,90,54,0.3);
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:20px;
+  }
+  h1{
+    font-size:clamp(2.4rem,6vw,4rem);
+    margin:0 0 14px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .tagline{
+    font-size:clamp(1.05rem,2.2vw,1.35rem);
+    color:var(--text-dim);
+    max-width:640px;
+    margin:0 auto 32px;
+  }
+  .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .btn{
+    display:inline-block;
+    padding:12px 26px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:0.98rem;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--accent),#ff8a5c);
+    color:#fff;
+    box-shadow:0 6px 18px rgba(255,90,54,0.35);
+  }
+  .btn-primary:hover{transform:translateY(-2px);text-decoration:none;}
+  .btn-secondary{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+  }
+  .btn-secondary:hover{transform:translateY(-2px);text-decoration:none;border-color:var(--accent);}
+
+  section{padding:64px 0;}
+  section + section{border-top:1px solid var(--border);}
+  h2{
+    font-size:clamp(1.5rem,3.2vw,2rem);
+    margin:0 0 8px;
+    font-weight:800;
+    letter-spacing:-0.01em;
+  }
+  .section-sub{color:var(--text-dim);margin:0 0 32px;max-width:640px;}
+
+  .about-text{font-size:1.05rem;color:var(--text-dim);max-width:760px;}
+
+  .features-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:18px;
+  }
+  .feature-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px;
+    box-shadow:var(--shadow);
+  }
+  .feature-card .icon{
+    font-size:1.4rem;
+    margin-bottom:10px;
+  }
+  .feature-card h3{
+    margin:0 0 6px;
+    font-size:1.05rem;
+    font-weight:700;
+  }
+  .feature-card p{
+    margin:0;
+    color:var(--text-dim);
+    font-size:0.95rem;
+  }
+
+  .tag-list{display:flex;flex-wrap:wrap;gap:10px;}
+  .tag{
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:0.9rem;
+    font-weight:600;
+  }
+  .tag.accent{
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+  .tag.accent2{
+    border-color:var(--accent-2);
+    color:var(--accent-2);
+  }
+
+  .arch{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px 24px;
+    overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:0.9rem;
+    color:var(--text-dim);
+    box-shadow:var(--shadow);
+  }
+
+  .showcase-note{
+    background:var(--card);
+    border:1px dashed var(--border);
+    border-radius:14px;
+    padding:20px 24px;
+    color:var(--text-dim);
+    font-size:0.95rem;
+  }
+
+  footer{
+    padding:40px 0;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:0.9rem;
+    border-top:1px solid var(--border);
+  }
+  footer a{font-weight:600;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Project Showcase</span>
+    <h1>Sportify</h1>
+    <p class="tagline">TURF MAX — a full-stack platform for booking turfs, building teams, and running matches and tournaments, end to end.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/kryptbakar/sportify">View the code</a>
+      <a class="btn btn-secondary" href="https://github.com/kryptbakar/sportify#readme">Read the docs</a>
+    </div>
+  </div>
+</header>
+
+<section id="about">
+  <div class="wrap">
+    <h2>About</h2>
+    <p class="section-sub">What Sportify does, in plain terms.</p>
+    <p class="about-text">
+      Sportify (TURF MAX) is a full-stack sports booking and match-management platform built around
+      turf and ground reservations. It lets players find and book turfs, form teams, get matched
+      against other teams, join tournaments, and keep a running history of their matches. Under the
+      hood it's a TypeScript monorepo with a React client, a Node/Express API, and a PostgreSQL
+      database managed through Drizzle ORM — with an unusually thorough set of setup, schema, and
+      audit docs alongside the code.
+    </p>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Features</h2>
+    <p class="section-sub">Core capabilities across booking, teams, and competition.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon">🏟️</div>
+        <h3>Turf discovery &amp; booking</h3>
+        <p>Browse turf listings, filter by preference, view details, and book with automatic conflict checking.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🧑‍🤝‍🧑</div>
+        <h3>Teams</h3>
+        <p>Create teams and manage membership so groups can play and compete together.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">⚔️</div>
+        <h3>Matches &amp; matchmaking</h3>
+        <p>Create matches, send invitations, and keep a full match history over time.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🏆</div>
+        <h3>Tournaments</h3>
+        <p>List and register for tournaments alongside regular match play.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📈</div>
+        <h3>Team ratings</h3>
+        <p>ELO-style team rating support for tracking competitive standing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🛠️</div>
+        <h3>Admin &amp; ops visibility</h3>
+        <p>Admin-facing views into users and system data, backed by a documented audit trail.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tech">
+  <div class="wrap">
+    <h2>Tech stack</h2>
+    <p class="section-sub">What Sportify is built with.</p>
+    <div class="tag-list">
+      <span class="tag accent">React</span>
+      <span class="tag accent">Vite</span>
+      <span class="tag">TypeScript</span>
+      <span class="tag">Tailwind CSS</span>
+      <span class="tag">Radix UI</span>
+      <span class="tag accent2">Node.js</span>
+      <span class="tag accent2">Express</span>
+      <span class="tag accent2">Drizzle ORM</span>
+      <span class="tag">PostgreSQL</span>
+      <span class="tag">Neon</span>
+      <span class="tag">Railway</span>
+    </div>
+    <br>
+    <div class="arch">
+client/   -&gt; Frontend (Vite + TypeScript + React)
+server/   -&gt; Backend API (Node/Express + TypeScript)
+shared/   -&gt; Shared types &amp; utilities
+migrations/ + drizzle.config.ts -&gt; Database migrations / ORM config
+    </div>
+  </div>
+</section>
+
+<section id="showcase">
+  <div class="wrap">
+    <h2>About this page</h2>
+    <div class="showcase-note">
+      This is a static project showcase page for Sportify, published via GitHub Pages. Sportify itself
+      is a full-stack application (React client + Express API + PostgreSQL database) and does not run
+      as a static site — for the live app, see the deployment instructions in the repository's
+      <code>QUICK_START.md</code> and <code>LOCAL_SETUP.md</code>, or explore the source directly on GitHub.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Sportify (TURF MAX) — <a href="https://github.com/kryptbakar/sportify">github.com/kryptbakar/sportify</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
